@@ -1,25 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import ReactJson from "react-json-view";
+import { Container, ButtonGroup, Button } from "./components";
+import { useBlockchain } from "./hooks";
 
 function App() {
+  const [messageList, setMessageList] = useState([]);
+  const [isOpen, lastMessage, subscribe, unsubscribe] = useBlockchain("wss://ws.blockchain.info/inv");
+
+  useEffect(() => {
+    if (lastMessage) {
+      setMessageList((prev) => [...prev, lastMessage]);
+    }
+  }, [lastMessage]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Container>
+        <ButtonGroup>
+          <Button variant="success" onClick={subscribe}>
+            Запуск
+          </Button>
+          <Button variant="danger" onClick={unsubscribe}>
+            Остановка
+          </Button>
+          <Button variant="warning" onClick={() => setMessageList([])}>
+            Сброс
+          </Button>
+        </ButtonGroup>
+      </Container>
+      <div>isOpen: {isOpen.toString()}</div>
+      <div>messages count: {messageList.length}</div>
+      <div>
+        <div>last message: </div>
+        {lastMessage && <ReactJson src={lastMessage} />}
+      </div>
+    </>
   );
 }
 
